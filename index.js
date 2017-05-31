@@ -9,7 +9,7 @@ const RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 const token = process.env.SLACK_API_TOKEN || '';
 const bot_token = process.env.SLACK_BOT_TOKEN || '';
 
-const  web = new WebClient(token);
+const web = new WebClient(token);
 const rtm = new RtmClient(bot_token);
 
 const { users, github2slack } = require('./users');
@@ -25,6 +25,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
       _channels[channel.name] = channel.id;
     }
   });
+  console.log(_channels);
   rtmStartData.users.forEach(user => {
     console.log(`${user.id} ${user.name}`);
     _users[user.name] = user.id;
