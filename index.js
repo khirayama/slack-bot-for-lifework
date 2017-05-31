@@ -69,7 +69,7 @@ function githubWebhookHandler(req, res) {
       users.map(user => user.github).forEach(githubName => {
         if (comment.indexOf(githubName) !== -1) {
           const slackName = github2slack(githubName);
-          const message = `@${slackName} ${comment.html_url} you've been mentioned`;
+          const message = `@${slackName} ${payload.comment.html_url} you've been mentioned`;
           if (slackName) {
             web.chat.postMessage(_users[slackName], message, () => {});
           }
