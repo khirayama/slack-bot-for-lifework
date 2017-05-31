@@ -12,6 +12,8 @@ const bot_token = process.env.SLACK_BOT_TOKEN || '';
 const  web = new WebClient(token);
 const rtm = new RtmClient(bot_token);
 
+const { users, github2slack } = require('./users');
+
 const channels = {};
 const users = {};
 
@@ -37,6 +39,50 @@ rtm.on(RTM_EVENTS.MESSAGE, message => {
 });
 rtm.start();
 
+// handlers
+function githubWebhookHandler(req, res) {
+  const CHANNEL = 'git';
+
+  const payload = req.body;
+  const pull = (payload.issue) ? payload.issue : payload.pull_request;
+  const pullType = (payload.issue) ? 'issue' : 'pull request';
+
+  console.log(payload.action);
+  switch (payload.action) {
+    case 'opened': {
+      const message = `${pull.html_url} ${pullType} been created`;
+      rtm.sendMessage(message, channels[CHANNEL]);
+      break;
+    }
+    case 'assigned': {
+      pull.assignees.forEach(assignee => {
+        const slackName = github2slack(assignee.login);
+        const message = `@${slackName} ${pull.html_url} you've been assigned`;
+        if (slackName) {
+          web.chat.postMessage(users[slackName], message, () => {});
+        }
+      });
+      break;
+    }
+    case 'created': {
+      const comment = payload.comment.body;
+      users.map(user => user.github).forEach(githubName => {
+        if (comment.indexOf(githubName) !== -1) {
+          const slackName = github2slack(githubName);
+          const message = `@${slackName} ${comment.html_url} you've been mentioned`;
+          if (slackName) {
+            web.chat.postMessage(users[slackName], message, () => {});
+          }
+        }
+      });
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  res.sendStatus(200);
+}
 
 // webhook
 const bodyParser = require('body-parser');
@@ -52,37 +98,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.namespace('/webhook', () => {
   app.namespace('/github', () => {
-    app.post('/', (req, res) => {
-      const CHANNEL = 'bot-test';
-      const event = req.body;
-      console.log(event.action);
-      switch (event.action) {
-        case 'opened': {
-          const issue = event.issue;
-          const message = `
-:github: Create ${issue.title} ${issue.url}
-by @${issue.user.login} to asignee: @${issue.assignee.login}
-          `;
-          console.log('github post', message);
-          console.log(event);
-          rtm.sendMessage(message, channels[CHANNEL]);
-          break;
-        }
-        case 'assigned': {
-          const issue = event.issue;
-          const message = `
-:github: Asign ${issue.title} ${issue.url}
-by @${issue.user.login}
-          `;
-          web.chat.postMessage(users[issue.assignee.login], message, () => {});
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-      res.sendStatus(200);
-    });
+    app.post('/', githubWebhookHandler);
   });
   app.namespace('/kibela', () => {
     app.post('/', (req, res) => {
