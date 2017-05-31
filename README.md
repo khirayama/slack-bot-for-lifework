@@ -10,8 +10,8 @@ https://slack-bot-for-lifework.herokuapp.com/
 
 https://slack-bot-for-lifework.herokuapp.com/webhook/github
 
-- (CH:GitHub) Create pull request
-- (CH:GitHub) Update deployment status as reaction
+- (CH:git) Create pull request
+- (CH:git) Update deployment status as reaction
 - (DM) Assign pull request and issue
 - (DM) Mention you in pull request and issue
 
@@ -19,10 +19,10 @@ https://slack-bot-for-lifework.herokuapp.com/webhook/github
 
 https://slack-bot-for-lifework.herokuapp.com/webhook/kibela
 
-- (CH:Wiki) Create wiki
-- (CH:Wiki) Comment
-- (CH:Blog) Create blog
-- (CH:Blog) Comment
+- (CH:wiki) Create wiki
+- (CH:wiki) Comment
+- (CH:blog) Create blog
+- (CH:blog) Comment
 - (DM) Mention you in wiki, blog and comment.
 
 
