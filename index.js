@@ -14,20 +14,20 @@ const rtm = new RtmClient(bot_token);
 
 const { users, github2slack } = require('./users');
 
-const channels = {};
-const users = {};
+const _channels = {};
+const _users = {};
 
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
   console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
   rtmStartData.channels.forEach(channel => {
     console.log(`${channel.id} ${channel.name} ${channel.is_member}`);
     if (channel.is_member) {
-      channels[channel.name] = channel.id;
+      _channels[channel.name] = channel.id;
     }
   });
   rtmStartData.users.forEach(user => {
     console.log(`${user.id} ${user.name}`);
-    users[user.name] = user.id;
+    _users[user.name] = user.id;
   });
 });
 rtm.on(RTM_CLIENT_EVENTS.RTM_CONNECTION_OPENED, () => {
@@ -51,7 +51,7 @@ function githubWebhookHandler(req, res) {
   switch (payload.action) {
     case 'opened': {
       const message = `${pull.html_url} ${pullType} been created`;
-      rtm.sendMessage(message, channels[CHANNEL]);
+      rtm.sendMessage(message, _channels[CHANNEL]);
       break;
     }
     case 'assigned': {
@@ -59,7 +59,7 @@ function githubWebhookHandler(req, res) {
         const slackName = github2slack(assignee.login);
         const message = `@${slackName} ${pull.html_url} you've been assigned`;
         if (slackName) {
-          web.chat.postMessage(users[slackName], message, () => {});
+          web.chat.postMessage(_users[slackName], message, () => {});
         }
       });
       break;
@@ -71,7 +71,7 @@ function githubWebhookHandler(req, res) {
           const slackName = github2slack(githubName);
           const message = `@${slackName} ${comment.html_url} you've been mentioned`;
           if (slackName) {
-            web.chat.postMessage(users[slackName], message, () => {});
+            web.chat.postMessage(_users[slackName], message, () => {});
           }
         }
       });
@@ -104,7 +104,7 @@ app.namespace('/webhook', () => {
     app.post('/', (req, res) => {
       console.log('kibela post');
       console.log(req.body);
-      rtm.sendMessage(JSON.stringify(req.body), channels['bot-test']);
+      rtm.sendMessage(JSON.stringify(req.body), _channels['bot-test']);
       res.sendStatus(200);
     });
   });
