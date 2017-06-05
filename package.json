@@ -5,7 +5,7 @@
   "author": "Kotaro Hirayama <just.do.it.my.life@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon src/index.js"
   },
   "dependencies": {
     "@slack/client": "^3.9.0",
